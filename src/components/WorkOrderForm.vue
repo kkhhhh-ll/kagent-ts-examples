@@ -4,6 +4,8 @@
     :title="isEdit ? '编辑工单' : '新建工单'"
     width="560px"
     :close-on-click-modal="false"
+    :lock-scroll="false"
+    class="wo-form-dialog"
     @update:model-value="$emit('update:visible', $event)"
     @open="handleOpen"
     @closed="handleClosed"
@@ -176,5 +178,35 @@ async function handleConfirm() {
   color: #606266;
   font-size: 14px;
   padding: 0 4px;
+}
+
+/* ===== 手机端 ===== */
+@media (max-width: 767px) {
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+}
+</style>
+
+<!-- 非 scoped：穿透 el-dialog 的 Teleport，用于对话框容器样式 -->
+<style lang="scss">
+@media (max-width: 767px) {
+  .wo-form-dialog {
+    width: 92% !important;
+    max-width: 92% !important;
+  }
+  .wo-form-dialog .el-dialog__body {
+    padding: 16px;
+  }
+  .wo-form-dialog .el-form-item {
+    margin-bottom: 14px;
+  }
+  .wo-form-dialog .el-form-item__label {
+    width: 80px !important;
+  }
+  .wo-form-dialog .el-form-item__content {
+    margin-left: 80px !important;
+  }
 }
 </style>

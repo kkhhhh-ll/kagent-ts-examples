@@ -1,7 +1,7 @@
 <template>
   <div class="main-layout">
     <el-container class="layout-container">
-      <!-- 侧边栏 -->
+      <!-- 侧边栏（桌面端） -->
       <el-aside width="220px" class="layout-aside">
         <div class="logo-area">
           <h3>业务管理系统</h3>
@@ -30,6 +30,12 @@
         <!-- 顶部栏 -->
         <el-header class="layout-header">
           <div class="header-left">
+            <el-button
+              class="menu-toggle-btn"
+              @click="sidebarVisible = true"
+              :icon="Operation"
+              text
+            />
             <span class="header-breadcrumb">
               {{ pageTitle }}
             </span>
@@ -37,7 +43,7 @@
           <div class="header-right">
             <el-button type="primary" plain @click="goToQA">
               <el-icon><ChatDotRound /></el-icon>
-              智能助手
+              <span class="btn-label">智能助手</span>
             </el-button>
           </div>
         </el-header>
@@ -48,16 +54,54 @@
         </el-main>
       </el-container>
     </el-container>
+
+    <!-- 移动端抽屉菜单 -->
+    <el-drawer
+      v-model="sidebarVisible"
+      :with-header="false"
+      direction="ltr"
+      :size="220"
+      class="mobile-sidebar-drawer"
+    >
+      <div class="logo-area">
+        <h3>业务管理系统</h3>
+      </div>
+      <el-menu
+        :default-active="route.path"
+        router
+        class="layout-menu"
+        background-color="transparent"
+        text-color="rgba(255,255,255,0.65)"
+        active-text-color="#fff"
+        @select="sidebarVisible = false"
+      >
+        <el-menu-item index="/">
+          <el-icon><Document /></el-icon>
+          <span>工单管理</span>
+        </el-menu-item>
+        <el-menu-item index="/plan">
+          <el-icon><Calendar /></el-icon>
+          <span>团队计划</span>
+        </el-menu-item>
+      </el-menu>
+    </el-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { Document, Calendar, ChatDotRound } from "@element-plus/icons-vue";
+import {
+  Document,
+  Calendar,
+  ChatDotRound,
+  Operation,
+} from "@element-plus/icons-vue";
 
 const route = useRoute();
 const router = useRouter();
+
+const sidebarVisible = ref(false);
 
 const pageTitle = computed(() => {
   const path = route.path;
@@ -187,5 +231,86 @@ function goToQA() {
   background: #f0f2f5;
   padding: 0;
   overflow: auto;
+}
+
+/* ===== 移动端抽屉菜单 ===== */
+// .mobile-sidebar-drawer {
+:deep(.el-drawer) {
+  width: 220px;
+  --el-drawer-bg-color: #1e293b;
+  background-color: #1e293b !important;
+  border: none;
+}
+
+:deep(.el-drawer__body) {
+  padding: 0;
+  background-color: #1e293b;
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.el-overlay) {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+// }
+
+/* ===== 移动端菜单按钮 ===== */
+.menu-toggle-btn {
+  display: none;
+}
+
+/* ===== 移动端响应式 ===== */
+@media (max-width: 767px) {
+  /* 隐藏桌面侧边栏 */
+  .layout-aside {
+    display: none;
+  }
+
+  /* 显示 hamburger 按钮 */
+  .menu-toggle-btn {
+    display: inline-flex;
+    margin-right: 8px;
+    font-size: 18px;
+  }
+
+  /* 顶部栏紧凑 */
+  .layout-header {
+    padding: 0 12px;
+    height: 52px;
+  }
+
+  .header-breadcrumb {
+    font-size: 14px;
+  }
+
+  /* 智能助手按钮只显示图标 */
+  .header-right .btn-label {
+    display: none;
+  }
+}
+
+/* 平板端：缩小侧边栏 */
+@media (min-width: 768px) and (max-width: 991px) {
+  .layout-aside {
+    width: 64px !important;
+    min-width: 64px !important;
+  }
+
+  .logo-area h3 {
+    display: none;
+  }
+
+  .layout-menu :deep(.el-menu-item) {
+    justify-content: center;
+    padding: 0 !important;
+  }
+
+  .layout-menu :deep(.el-menu-item span) {
+    display: none;
+  }
+
+  .layout-menu :deep(.el-menu-item .el-icon) {
+    margin-right: 0 !important;
+  }
 }
 </style>

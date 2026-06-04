@@ -308,4 +308,106 @@ onMounted(() => {
   flex-shrink: 0;
   padding: 12px 0 24px;
 }
+
+/* ===== 手机端 ===== */
+@media (max-width: 767px) {
+  .work-order-list {
+    padding: 8px 12px 0;
+  }
+
+  .list-toolbar {
+    justify-content: stretch;
+
+    .el-button {
+      width: 100%;
+    }
+  }
+
+  .search-card {
+    margin-bottom: 12px;
+  }
+
+  // 搜索表单堆叠
+  .search-card :deep(.el-form--inline) {
+    .el-form-item {
+      display: block;
+      width: 100%;
+      margin-right: 0;
+    }
+
+    .el-form-item__label {
+      display: block;
+      text-align: left;
+      padding-bottom: 4px;
+    }
+
+    .el-form-item__content {
+      display: block;
+      width: 100%;
+    }
+
+    .el-input,
+    .el-select {
+      width: 100% !important;
+    }
+
+    // 查询/重置按钮行：两个按钮各占一半
+    .el-form-item:last-child {
+      display: flex;
+      gap: 8px;
+
+      .el-button {
+        flex: 1;
+      }
+    }
+  }
+
+  // 表格：缩小单元格、允许水平滚动
+  .table-card {
+    margin-bottom: 12px;
+
+    :deep(.el-table) {
+      th.el-table__cell,
+      td.el-table__cell {
+        padding: 6px 4px;
+        font-size: 12px;
+      }
+    }
+
+    // 手机上去掉固定列（操作列自然滚动）
+    :deep(.el-table__fixed-right) {
+      display: none !important;
+    }
+
+    :deep(.el-table__body-wrapper) {
+      overflow-x: auto;
+    }
+  }
+
+  // 分页精简
+  .pagination-wrapper {
+    justify-content: center;
+    padding: 8px 0 16px;
+
+    :deep(.el-pagination) {
+      .el-pagination__total,
+      .el-pagination__sizes,
+      .el-pagination__jump {
+        display: none;
+      }
+
+      .btn-prev,
+      .btn-next {
+        min-width: 36px;
+        height: 36px;
+      }
+
+      .el-pager li {
+        min-width: 36px;
+        height: 36px;
+        line-height: 36px;
+      }
+    }
+  }
+}
 </style>

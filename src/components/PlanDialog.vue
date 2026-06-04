@@ -5,6 +5,7 @@
     width="520px"
     :close-on-click-modal="false"
     :lock-scroll="false"
+    class="plan-form-dialog"
     @update:model-value="$emit('update:visible', $event)"
     @open="handleOpen"
     @closed="handleClosed"
@@ -114,7 +115,9 @@ function handleOpen() {
     formData.creator = props.plan.creator;
     formData.content = props.plan.content;
     // 解析 "09:00~10:30" → ["09:00", "10:30"]
-    timeRange.value = props.plan.visitTime ? props.plan.visitTime.split("~") : [];
+    timeRange.value = props.plan.visitTime
+      ? props.plan.visitTime.split("~")
+      : [];
   } else {
     formData.date = props.defaultDate || "";
     formData.creator = "";
@@ -150,3 +153,23 @@ async function handleConfirm() {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+/* 预留为后续桌面端样式 */
+</style>
+
+<!-- 非 scoped：穿透 el-dialog 的 Teleport -->
+<style lang="scss">
+@media (max-width: 767px) {
+  .plan-form-dialog {
+    width: 92% !important;
+    max-width: 92% !important;
+  }
+  .plan-form-dialog .el-form-item {
+    margin-bottom: 14px;
+  }
+  .plan-form-dialog .el-form-item__label {
+    width: 80px !important;
+  }
+}
+</style>

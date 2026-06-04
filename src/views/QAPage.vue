@@ -330,6 +330,13 @@ onMounted(() => {
   if (!hasApi) {
     voiceError.value = "当前浏览器不支持语音识别，请使用 Chrome 或 Edge";
   }
+
+  // 小屏幕（<=767px）默认折叠侧边栏
+  const mq = window.matchMedia("(max-width: 767px)");
+  sidebarCollapsed.value = mq.matches;
+  mq.addEventListener("change", (e) => {
+    sidebarCollapsed.value = e.matches;
+  });
 });
 
 // 折叠侧边栏时：立即隐藏内容；展开时：等待动画完成再展示内容
@@ -587,16 +594,32 @@ async function handleSend() {
   const timeoutId = setTimeout(() => abortController?.abort(), 120000);
 
   try {
-    const res = await fetch(`${API_BASE_URL}/api/qa`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sessionId: sessionId.value, message: text }),
-      signal: abortController.signal,
-    });
+    // 首次启动后端时可能返回 502，最多重试 2 次
+    let res: Response | null = null;
+    for (let attempt = 0; attempt <= 2; attempt++) {
+      try {
+        res = await fetch(`${API_BASE_URL}/api/qa`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sessionId: sessionId.value, message: text }),
+          signal: abortController.signal,
+        });
+        if (res.ok) break;
+        if (res.status !== 502 || attempt >= 2) {
+          throw new Error(`请求失败 (${res.status})`);
+        }
+      } catch (err: any) {
+        if (err.name === "AbortError") throw err;
+        if (attempt >= 2) throw err;
+        // 等待后重试（1s, 2s）
+        await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
+        continue;
+      }
+    }
 
     clearTimeout(timeoutId);
 
-    if (!res.ok) throw new Error(`请求失败 (${res.status})`);
+    if (!res || !res.ok) throw new Error(`请求失败 (${res?.status || "unknown"})`);
     if (!res.body) throw new Error("无响应体");
 
     const reader = res.body.getReader();
@@ -653,7 +676,6 @@ async function handleSend() {
     abortController = null;
   }
 }
-
 onMounted(async () => {
   await fetchSessions();
   if (sessionList.value.length > 0) {
@@ -1119,5 +1141,40 @@ onMounted(async () => {
   font-size: 12px;
   color: #f56c6c;
   margin: 6px 0 0;
+}
+
+/* ===== 手机端 ===== */
+@media (max-width: 767px) {
+  .qa-sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+  }
+  .qa-sidebar.collapsed {
+    position: static;
+  }
+
+  .chat-mic-btn {
+    display: none;
+  }
+
+  .message {
+    padding: 14px 16px;
+    gap: 12px;
+  }
+
+  .chat-input-area {
+    padding: 8px 12px 16px;
+  }
+
+  .chat-input-wrapper {
+    padding: 8px 10px;
+  }
+
+  .chat-empty h1 {
+    font-size: 22px;
+  }
 }
 </style>

@@ -776,4 +776,78 @@ onMounted(() => {
 :deep(.el-drawer__body) {
   padding: 16px 20px;
 }
+
+/* ===== 手机端 ===== */
+@media (max-width: 767px) {
+  .plan-calendar {
+    padding: 8px 6px;
+  }
+
+  .calendar-toolbar {
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .toolbar-title {
+    font-size: 15px;
+    min-width: auto;
+    margin-left: 4px;
+  }
+
+  .header-cell {
+    font-size: 11px;
+    padding: 4px 0;
+  }
+
+  .calendar-cell {
+    padding: 2px 2px;
+  }
+
+  .cell-day {
+    font-size: 11px;
+
+    &.is-today {
+      width: 20px;
+      height: 20px;
+      font-size: 10px;
+    }
+  }
+
+  // 手机上隐藏单元格新增按钮
+  .cell-add-btn {
+    display: none;
+  }
+
+  // 隐藏计划文字，只保留标记旗帜
+  .cell-plan .plan-body {
+    display: none;
+  }
+
+  .cell-plan {
+    padding: 1px 2px;
+    justify-content: center;
+  }
+
+  .plan-flag {
+    width: 10px;
+  }
+
+  .plan-del-btn {
+    opacity: 1;
+    width: 18px;
+    height: 18px;
+  }
+
+  .cell-more {
+    font-size: 10px;
+    padding: 1px 2px;
+  }
+
+  // 详情抽屉适应
+  :deep(.el-drawer) {
+    width: 100% !important;
+    max-width: 100vw;
+  }
+}
 </style>

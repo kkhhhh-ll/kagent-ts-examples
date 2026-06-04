@@ -62,7 +62,7 @@ export async function request<T = any>(
     body,
     headers = {},
     timeout = 30000,
-    retry = 1,
+    retry = 2,
     silent = false,
   } = options;
 
