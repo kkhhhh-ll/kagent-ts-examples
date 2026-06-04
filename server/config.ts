@@ -3,14 +3,37 @@ import fs from "fs";
 import path from "path";
 import { PROJECT_ROOT } from "./paths.js";
 
-// ============ 加载 .env ============
+// ============ 查找并加载 .env ============
 
-const envPath = path.resolve(PROJECT_ROOT, ".env");
-if (fs.existsSync(envPath)) {
-  dotenv.config({ path: envPath });
-} else {
+function loadEnv(): void {
+  // 1) 显式指定路径（最高优先级）：DOTENV_PATH=/etc/myapp/.env
+  if (process.env.DOTENV_PATH) {
+    const p = path.resolve(process.env.DOTENV_PATH);
+    if (fs.existsSync(p)) {
+      dotenv.config({ path: p });
+      return;
+    }
+    console.warn(`⚠️  DOTENV_PATH 指定的文件不存在: ${p}`);
+  }
+
+  // 2) 项目根目录（开发模式：.env 与 server/ 同级）
+  const atRoot = path.resolve(PROJECT_ROOT, ".env");
+  if (fs.existsSync(atRoot)) {
+    dotenv.config({ path: atRoot });
+    return;
+  }
+
+  // 3) 当前工作目录（部署模式：.env 与 dist/ 或 server/ 同级）
+  const atCwd = path.resolve(process.cwd(), ".env");
+  if (fs.existsSync(atCwd)) {
+    dotenv.config({ path: atCwd });
+    return;
+  }
+
   console.warn("⚠️  未找到 .env 文件，将使用环境变量");
 }
+
+loadEnv();
 
 // ============ 校验函数 ============
 
