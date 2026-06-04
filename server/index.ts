@@ -20,7 +20,7 @@ app.use(express.json());
 // ============ 静态文件 ============
 
 // 提供 trace HTML 报告访问：http://localhost:3001/traces/<sessionId>.html
-const TRACES_DIR = path.resolve(PROJECT_ROOT, "data", "traces");
+const TRACES_DIR = path.resolve(PROJECT_ROOT, "server", "data", "traces");
 app.use("/traces", express.static(TRACES_DIR));
 
 // 生产环境：提供前端构建产物（dist/）
