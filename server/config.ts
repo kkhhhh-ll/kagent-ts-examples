@@ -1,10 +1,11 @@
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import { PROJECT_ROOT } from "./paths.js";
 
 // ============ 加载 .env ============
 
-const envPath = path.resolve(process.cwd(), ".env");
+const envPath = path.resolve(PROJECT_ROOT, ".env");
 if (fs.existsSync(envPath)) {
   dotenv.config({ path: envPath });
 } else {
@@ -88,6 +89,10 @@ export interface AppConfig {
   baseURL: string | undefined;
   /** 服务端口，默认 3001 */
   port: number;
+  /** 允许的 CORS origin，默认 * */
+  corsOrigin: string;
+  /** 是否在 production 模式下托管前端静态文件，默认 false */
+  serveStatic: boolean;
 }
 
 let config: AppConfig | null = null;
@@ -122,6 +127,8 @@ export function loadConfig(): AppConfig {
     model: process.env.OPENAI_MODEL || "gpt-4o",
     baseURL: process.env.OPENAI_BASE_URL || undefined,
     port: Number(process.env.PORT) || 3001,
+    corsOrigin: process.env.CORS_ORIGIN || "*",
+    serveStatic: process.env.SERVE_STATIC === "true",
   };
 
   return config;
@@ -144,5 +151,7 @@ export function printConfigSummary(cfg: AppConfig): void {
   console.log(`  模型       ${cfg.model}`);
   console.log(`  接口地址   ${cfg.baseURL || "https://api.openai.com/v1"}`);
   console.log(`  端口       ${cfg.port}`);
+  console.log(`  CORS       ${cfg.corsOrigin}`);
+  console.log(`  静态文件   ${cfg.serveStatic ? "托管" : "不托管"}`);
   console.log("");
 }

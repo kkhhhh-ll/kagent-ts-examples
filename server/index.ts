@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
+import { PROJECT_ROOT } from "./paths.js";
 import qaRouter from "./routes/qa.js";
 import orderRouter from "./routes/orders.js";
 import planRouter from "./routes/plans.js";
@@ -13,17 +14,17 @@ const config = loadConfig();
 printConfigSummary(config);
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: config.corsOrigin }));
 app.use(express.json());
 
 // ============ 静态文件 ============
 
 // 提供 trace HTML 报告访问：http://localhost:3001/traces/<sessionId>.html
-const TRACES_DIR = path.resolve(process.cwd(), "data", "traces");
+const TRACES_DIR = path.resolve(PROJECT_ROOT, "data", "traces");
 app.use("/traces", express.static(TRACES_DIR));
 
 // 生产环境：提供前端构建产物（dist/）
-const DIST_DIR = path.resolve(process.cwd(), "dist");
+const DIST_DIR = path.resolve(PROJECT_ROOT, "dist");
 
 // ============ 挂载路由 ============
 
@@ -31,9 +32,11 @@ app.use("/api/qa", qaRouter);
 app.use("/api/orders", orderRouter);
 app.use("/api/plans", planRouter);
 
-// ============ 生产环境：前端静态文件 + SPA 回退 ============
+// ============ 可选：前端静态文件 + SPA 回退 ============
+// 前后端分别部署时关闭此功能，前端由 Nginx / CDN 独立托管。
+// 设置 SERVE_STATIC=true 来启用。
 
-if (process.env.NODE_ENV === "production") {
+if (config.serveStatic) {
   app.use(express.static(DIST_DIR));
   // SPA 回退：所有非 API 路由返回 index.html（API 路由已在上面优先匹配）
   app.get("*", (_req, res) => {

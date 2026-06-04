@@ -2,13 +2,14 @@ import { ReActAgent, SkillManager, TraceLogger } from "kagent-ts";
 import type { Tool } from "kagent-ts";
 import path from "path";
 import fs from "fs";
+import { PROJECT_ROOT } from "./paths.js";
 import { createLLM } from "./llm.js";
 
 /** TraceLogger 输出目录（data/traces/，和 .db 文件放在一起） */
-const TRACE_OUTPUT_DIR = path.resolve(process.cwd(), "data", "traces");
+const TRACE_OUTPUT_DIR = path.resolve(PROJECT_ROOT, "data", "traces");
 
 /** Skills 目录（server/skills/） */
-const SKILLS_DIR = path.resolve(process.cwd(), "server", "skills");
+const SKILLS_DIR = path.resolve(PROJECT_ROOT, "server", "skills");
 
 // ============ Trace 持久化（重启不丢） ============
 

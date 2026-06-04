@@ -302,7 +302,7 @@
 import { ref, onMounted, nextTick, watch } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessageBox, ElMessage } from "element-plus";
-import { api } from "@/utils/request";
+import { api, API_BASE_URL } from "@/utils/request";
 
 const router = useRouter();
 const chatRef = ref<HTMLElement>();
@@ -453,7 +453,7 @@ function goBack() {
 }
 
 function openTrace(id: string) {
-  window.open(`/traces/${id}.html`, "_blank");
+  window.open(`${API_BASE_URL}/traces/${id}.html`, "_blank");
 }
 
 function scrollToBottom() {
@@ -587,7 +587,7 @@ async function handleSend() {
   const timeoutId = setTimeout(() => abortController?.abort(), 120000);
 
   try {
-    const res = await fetch(`/api/qa`, {
+    const res = await fetch(`${API_BASE_URL}/api/qa`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sessionId: sessionId.value, message: text }),

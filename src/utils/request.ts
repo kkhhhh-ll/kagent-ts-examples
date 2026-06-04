@@ -1,5 +1,10 @@
 import { ElMessage } from "element-plus";
 
+// ============ API 基础地址 ============
+
+/** 后端 API 基础地址，前后端分别部署时通过构建时环境变量 VITE_API_BASE_URL 设置 */
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
+
 // ============ 类型 ============
 
 export interface RequestOptions {
@@ -82,7 +87,7 @@ export async function request<T = any>(
 
   for (let attempt = 0; attempt <= retry; attempt++) {
     try {
-      const res = await fetch(url, fetchOptions);
+      const res = await fetch(API_BASE_URL + url, fetchOptions);
 
       if (!res.ok) {
         const errorText = await res

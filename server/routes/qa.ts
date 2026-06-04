@@ -33,7 +33,7 @@ function extractAnswer(raw: string): string {
   if (!raw) return "";
   try {
     const parsed = parseReActResponse(raw);
-    if (parsed.answer) return parsed.answer;
+    if ("answer" in parsed && parsed.answer) return parsed.answer;
   } catch {}
   return raw;
 }
