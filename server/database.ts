@@ -5,9 +5,9 @@ import { PROJECT_ROOT } from "./paths.js";
 
 // ============ 数据库文件路径 ============
 
-/** 数据库存储在项目根目录的 data/ 文件夹下 */
-const DB_DIR = path.resolve(PROJECT_ROOT, "data");
-const DB_PATH = path.join(DB_DIR, "work-orders.db");
+/** 数据库存储在 server/data/ 文件夹下 */
+const DB_DIR = path.resolve(PROJECT_ROOT, "server", "data");
+const DB_PATH = path.join(DB_DIR, "kagent.db");
 
 let db: SqlJsDatabase | null = null;
 
