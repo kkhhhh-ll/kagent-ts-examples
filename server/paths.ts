@@ -18,3 +18,15 @@ const _isDist = path.basename(_dirname) === "dist";
 export const PROJECT_ROOT = _isDist
   ? path.resolve(_dirname, "../..")
   : path.resolve(_dirname, "..");
+
+/**
+ * 后端代码目录的绝对路径。
+ *
+ * 开发时（tsx）：就是 _dirname 本身（server/）
+ * 生产时（编译后）：server/dist/ 的父目录（server/）
+ *
+ * 无论部署时叫 server 还是 backend，此路径始终正确。
+ */
+export const SERVER_DIR = _isDist
+  ? path.resolve(_dirname, "..")
+  : _dirname;

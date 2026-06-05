@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
-import { PROJECT_ROOT } from "./paths.js";
+import fs from "fs";
+import { PROJECT_ROOT, SERVER_DIR } from "./paths.js";
 import qaRouter from "./routes/qa.js";
 import orderRouter from "./routes/orders.js";
 import planRouter from "./routes/plans.js";
@@ -20,7 +21,14 @@ app.use(express.json());
 // ============ 静态文件 ============
 
 // 提供 trace HTML 报告访问：http://localhost:3001/traces/<sessionId>.html
-const TRACES_DIR = path.resolve(PROJECT_ROOT, "server", "data", "traces");
+const TRACES_DIR = path.resolve(SERVER_DIR, "data", "traces");
+
+// 确保 trace 目录在启动时已就绪（express.static 不会自动创建目录）
+if (!fs.existsSync(TRACES_DIR)) {
+  fs.mkdirSync(TRACES_DIR, { recursive: true });
+}
+console.log(`📁 Trace 文件目录: ${TRACES_DIR}`);
+
 app.use("/traces", express.static(TRACES_DIR));
 
 // 生产环境：提供前端构建产物（dist/）

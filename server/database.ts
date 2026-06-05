@@ -1,12 +1,12 @@
 import initSqlJs, { type Database as SqlJsDatabase } from "sql.js";
 import path from "path";
 import fs from "fs";
-import { PROJECT_ROOT } from "./paths.js";
+import { SERVER_DIR } from "./paths.js";
 
 // ============ 数据库文件路径 ============
 
 /** 数据库存储在 server/data/ 文件夹下 */
-const DB_DIR = path.resolve(PROJECT_ROOT, "server", "data");
+const DB_DIR = path.resolve(SERVER_DIR, "data");
 const DB_PATH = path.join(DB_DIR, "kagent.db");
 
 let db: SqlJsDatabase | null = null;
