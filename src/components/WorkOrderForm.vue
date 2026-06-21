@@ -41,7 +41,11 @@
         </el-select>
       </el-form-item>
       <div class="form-row">
-        <el-form-item prop="duration" label="工期（天）" style="flex: 1">
+        <el-form-item
+          prop="duration"
+          label="工期（天）"
+          style="flex: 1; width: 100%"
+        >
           <el-input-number
             v-model="formData.duration"
             :min="1"
@@ -50,7 +54,11 @@
             placeholder="请输入工期"
           />
         </el-form-item>
-        <el-form-item prop="cost" label="费用（元）" style="flex: 1">
+        <el-form-item
+          prop="cost"
+          label="费用（元）"
+          style="flex: 1; width: 100%"
+        >
           <el-input-number
             v-model="formData.cost"
             :min="0"
