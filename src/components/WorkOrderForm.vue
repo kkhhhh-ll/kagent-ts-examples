@@ -180,6 +180,11 @@ async function handleConfirm() {
   padding: 0 4px;
 }
 
+// 数字输入框撑满宽度
+:deep(.el-input-number) {
+  width: 100%;
+}
+
 /* ===== 手机端 ===== */
 @media (max-width: 767px) {
   .form-row {
@@ -201,12 +206,20 @@ async function handleConfirm() {
   }
   .wo-form-dialog .el-form-item {
     margin-bottom: 14px;
+    display: block;
   }
+  // 移动端 label 顶置，不再和输入框争水平空间
   .wo-form-dialog .el-form-item__label {
-    width: 80px !important;
+    width: auto !important;
+    float: none;
+    display: block;
+    text-align: left;
+    padding-bottom: 4px;
+    line-height: 1.4;
   }
   .wo-form-dialog .el-form-item__content {
-    margin-left: 80px !important;
+    margin-left: 0 !important;
+    display: block;
   }
 }
 </style>

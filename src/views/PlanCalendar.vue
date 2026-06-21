@@ -436,6 +436,8 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@use '@/assets/styles/variables' as *;
+
 .plan-calendar {
   height: 100%;
   display: flex;
@@ -552,7 +554,7 @@ onMounted(() => {
   color: #303133;
 
   &.is-today {
-    background: #409eff;
+    background: #{$primary-color};
     color: #fff;
     border-radius: 50%;
     width: 24px;
@@ -569,7 +571,7 @@ onMounted(() => {
   border-radius: 4px;
   border: none;
   background: transparent;
-  color: #409eff;
+  color: #{$primary-color};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -581,7 +583,7 @@ onMounted(() => {
   flex-shrink: 0;
 
   &:hover {
-    background: rgba(64, 158, 255, 0.15);
+    background: rgba($primary-color, 0.15);
   }
 }
 
@@ -607,7 +609,7 @@ onMounted(() => {
   position: relative;
 
   &:hover {
-    background: rgba(64, 158, 255, 0.1);
+    background: rgba($primary-color, 0.1);
 
     .plan-del-btn {
       opacity: 1;
@@ -677,13 +679,13 @@ onMounted(() => {
 
 .cell-more {
   font-size: 12px;
-  color: #409eff;
+  color: #{$primary-color};
   cursor: pointer;
   padding: 2px 4px;
   flex-shrink: 0;
 
   &:hover {
-    color: #66b1ff;
+    color: $primary-light;
   }
 }
 
@@ -747,8 +749,8 @@ onMounted(() => {
 .detail-item-time {
   font-size: 12px;
   font-weight: 600;
-  color: #409eff;
-  background: rgba(64, 158, 255, 0.08);
+  color: #{$primary-color};
+  background: rgba($primary-color, 0.08);
   padding: 1px 8px;
   border-radius: 4px;
 }

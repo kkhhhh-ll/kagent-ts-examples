@@ -117,6 +117,8 @@ function goToQA() {
 </script>
 
 <style lang="scss" scoped>
+@use '@/assets/styles/variables' as *;
+
 .main-layout {
   height: 100vh;
   overflow: hidden;
@@ -128,7 +130,7 @@ function goToQA() {
 
 /* ===== 侧边栏 ===== */
 .layout-aside {
-  background-color: #1e293b;
+  background: linear-gradient(180deg, $sidebar-bg-start 0%, $sidebar-bg-end 100%);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -140,7 +142,7 @@ function goToQA() {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 
   h3 {
     color: #f1f5f9;
@@ -159,32 +161,33 @@ function goToQA() {
   :deep(.el-menu-item) {
     border-left: 3px solid transparent;
     transition: all 0.2s ease;
-    margin: 2px 0;
+    margin: 2px 8px;
     height: 44px;
     line-height: 44px;
+    border-radius: 8px;
 
     &:hover {
-      background-color: rgba(255, 255, 255, 0.08);
-      color: #f1f5f9;
+      background-color: rgba($primary-color, 0.1);
+      color: #e2e8f0;
     }
 
     // 选中态 — 左侧亮色指示条 + 加亮文字
     &.is-active {
-      border-left-color: #60a5fa;
+      border-left-color: $primary-light;
       background: linear-gradient(
         90deg,
-        rgba(96, 165, 250, 0.12) 0%,
-        transparent 100%
+        rgba($primary-color, 0.15) 0%,
+        rgba($primary-color, 0.04) 100%
       );
       color: #fff;
 
       .el-icon {
-        color: #60a5fa;
+        color: $primary-light;
       }
     }
 
     .el-icon {
-      color: rgba(255, 255, 255, 0.5);
+      color: rgba(255, 255, 255, 0.45);
       transition: color 0.2s;
       margin-right: 10px;
     }
@@ -237,14 +240,14 @@ function goToQA() {
 // .mobile-sidebar-drawer {
 :deep(.el-drawer) {
   width: 220px;
-  --el-drawer-bg-color: #1e293b;
-  background-color: #1e293b !important;
+  --el-drawer-bg-color: #{$sidebar-bg-start};
+  background-color: $sidebar-bg-start !important;
   border: none;
 }
 
 :deep(.el-drawer__body) {
   padding: 0;
-  background-color: #1e293b;
+  background: linear-gradient(180deg, $sidebar-bg-start 0%, $sidebar-bg-end 100%);
   display: flex;
   flex-direction: column;
 }

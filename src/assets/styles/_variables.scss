@@ -1,20 +1,27 @@
-// 主题色
-$primary-color: #409eff;
-$success-color: #67c23a;
-$warning-color: #e6a23c;
-$danger-color: #f56c6c;
+// ===== 品牌色（Indigo 靛蓝体系） =====
+$primary-color: #6366f1;
+$primary-light: #818cf8;
+$primary-lighter: #a5b4fc;
+$primary-dark: #4f46e5;
+$success-color: #10b981;
+$warning-color: #f59e0b;
+$danger-color: #ef4444;
 
-// 文字色
+// ===== 侧边栏 =====
+$sidebar-bg-start: #0f1423;
+$sidebar-bg-end: #0b0f1a;
+
+// ===== 文字色 =====
 $text-primary: #303133;
 $text-regular: #606266;
 $text-secondary: #909399;
 $text-placeholder: #c0c4cc;
 
-// 边框
+// ===== 边框 =====
 $border-color: #dcdfe6;
 $border-radius: 4px;
 
-// 间距
+// ===== 间距 =====
 $spacing-xs: 4px;
 $spacing-sm: 8px;
 $spacing-md: 16px;

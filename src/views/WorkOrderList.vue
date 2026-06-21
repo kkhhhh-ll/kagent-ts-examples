@@ -55,7 +55,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="creator" label="创建人" />
-        <el-table-column prop="type" label="工单类型">
+        <el-table-column prop="type" label="工单类型" width="100">
           <template #default="{ row }">
             <el-tag
               :type="row.type === '项目验收' ? 'success' : 'warning'"
@@ -362,7 +362,7 @@ onMounted(() => {
     }
   }
 
-  // 表格：缩小单元格、允许水平滚动
+  // 表格：缩小单元格 + min-width 保证每列可读 + 横向滚动
   .table-card {
     margin-bottom: 12px;
 
@@ -371,10 +371,24 @@ onMounted(() => {
       td.el-table__cell {
         padding: 6px 4px;
         font-size: 12px;
+        min-width: 60px;
+      }
+
+      // 工单类型列：el-tag 需要额外空间
+      th.el-table__cell:nth-child(4),
+      td.el-table__cell:nth-child(4) {
+        min-width: 100px;
+      }
+
+      // 操作列：三个按钮需要足够空间
+      th.el-table__cell:nth-child(7),
+      td.el-table__cell:nth-child(7) {
+        min-width: 170px;
+        white-space: nowrap;
       }
     }
 
-    // 手机上去掉固定列（操作列自然滚动）
+    // 手机上去掉固定列（固定列与横向滚动冲突）
     :deep(.el-table__fixed-right) {
       display: none !important;
     }

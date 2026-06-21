@@ -39,8 +39,9 @@
             </div>
             <button
               class="sidebar-item-btn"
-              @click.stop="openTrace(s.id)"
-              title="查看轨迹"
+              :class="{ disabled: s.msgCount === 0 }"
+              @click.stop="s.msgCount > 0 && openTrace(s.id)"
+              :title="s.msgCount > 0 ? '查看轨迹' : '暂无对话记录'"
             >
               <svg
                 width="14"
@@ -57,6 +58,7 @@
               </svg>
             </button>
             <button
+              v-if="sessionList.length > 1"
               class="sidebar-item-del"
               @click.stop="handleDeleteSession(s.id)"
               title="删除会话"
@@ -546,17 +548,17 @@ async function handleDeleteSession(id: string) {
   }
 
   try {
+    const isCurrentSession = sessionId.value === id;
     await api.delete(`/api/qa/${id}`, { silent: true });
     ElMessage.success("会话已删除");
     await fetchSessions();
-    if (sessionId.value === id) {
+
+    if (isCurrentSession) {
+      // 删除的是当前会话 → 切到第一个剩余会话并加载真实消息
       const remaining = sessionList.value.filter((s) => s.id !== id);
       if (remaining.length > 0) {
-        sessionId.value = remaining[0].id;
-      } else {
-        sessionId.value = "";
+        await switchSession(remaining[0].id);
       }
-      messages.value = [];
     }
   } catch {
     // 错误已在 request.ts 中弹提示
@@ -680,6 +682,14 @@ onMounted(async () => {
   await fetchSessions();
   if (sessionList.value.length > 0) {
     await switchSession(sessionList.value[0].id);
+  } else {
+    // 没有会话时，自动创建一个新会话作为默认
+    try {
+      sessionId.value = await createNewSession();
+      await fetchSessions();
+    } catch {
+      // 静默失败
+    }
   }
 });
 </script>
@@ -832,6 +842,14 @@ onMounted(async () => {
 .sidebar-item-btn:hover {
   color: #58a6ff;
   background: rgba(88, 166, 255, 0.12);
+}
+.sidebar-item-btn.disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.sidebar-item-btn.disabled:hover {
+  color: rgba(255, 255, 255, 0.4);
+  background: transparent;
 }
 
 .sidebar-item-content {
@@ -1156,7 +1174,8 @@ onMounted(async () => {
     position: static;
   }
 
-  .chat-mic-btn {
+  .chat-mic-btn,
+  .chat-input-error {
     display: none;
   }
 

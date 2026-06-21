@@ -167,9 +167,20 @@ async function handleConfirm() {
   }
   .plan-form-dialog .el-form-item {
     margin-bottom: 14px;
+    display: block;
   }
+  // 移动端 label 顶置，不再和输入框争水平空间
   .plan-form-dialog .el-form-item__label {
-    width: 80px !important;
+    width: auto !important;
+    float: none;
+    display: block;
+    text-align: left;
+    padding-bottom: 4px;
+    line-height: 1.4;
+  }
+  .plan-form-dialog .el-form-item__content {
+    margin-left: 0 !important;
+    display: block;
   }
 }
 </style>
