@@ -132,6 +132,17 @@ export function getAllSessions() {
   }));
 }
 
+/** 清空会话所有消息（保留会话本身），内存 + 数据库同步 */
+export function clearSessionMessages(sessionId: string): void {
+  const session = qaSessions.get(sessionId);
+  if (session) {
+    session.messages = [];
+    session.title = "新会话";
+  }
+  executeWrite("DELETE FROM messages WHERE session_id = ?", [sessionId]);
+  executeWrite("UPDATE sessions SET title = '新会话' WHERE id = ?", [sessionId]);
+}
+
 export function deleteSession(sessionId: string): boolean {
   // 清除内存缓存
   qaSessions.delete(sessionId);

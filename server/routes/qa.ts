@@ -15,6 +15,7 @@ import {
   getOrCreateQASession,
   getAllSessions,
   deleteSession,
+  clearSessionMessages,
   sendSSE,
   accumulateToolCalls,
   buildLLMMessages,
@@ -262,6 +263,11 @@ router.delete("/:sessionId", (req, res) => {
     res.status(404).json({ error: "会话不存在" });
     return;
   }
+  res.json({ success: true });
+});
+
+router.delete("/:sessionId/messages", (req, res) => {
+  clearSessionMessages(req.params.sessionId);
   res.json({ success: true });
 });
 

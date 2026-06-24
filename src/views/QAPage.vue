@@ -58,10 +58,10 @@
               </svg>
             </button>
             <button
-              v-if="sessionList.length > 1"
+              v-if="sessionList.length > 1 || s.msgCount > 0"
               class="sidebar-item-del"
-              @click.stop="handleDeleteSession(s.id)"
-              title="删除会话"
+              @click.stop="handleDeleteOrClearSession(s.id)"
+              :title="sessionList.length > 1 ? '删除会话' : '清空对话'"
             >
               <svg
                 width="14"
@@ -536,28 +536,42 @@ async function switchSession(id: string) {
   }
 }
 
-async function handleDeleteSession(id: string) {
+async function handleDeleteOrClearSession(id: string) {
+  const isLastSession = sessionList.value.length <= 1;
+
   try {
-    await ElMessageBox.confirm("确定删除该会话？", "提示", {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
-    });
+    await ElMessageBox.confirm(
+      isLastSession ? "确定清空当前对话内容？" : "确定删除该会话？",
+      "提示",
+      {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      },
+    );
   } catch {
     return;
   }
 
   try {
-    const isCurrentSession = sessionId.value === id;
-    await api.delete(`/api/qa/${id}`, { silent: true });
-    ElMessage.success("会话已删除");
-    await fetchSessions();
+    if (isLastSession) {
+      // 只剩一条会话 → 清空消息而非删除会话
+      await api.delete(`/api/qa/${id}/messages`, { silent: true });
+      messages.value = [];
+      ElMessage.success("对话已清空");
+      await fetchSessions();
+    } else {
+      const isCurrentSession = sessionId.value === id;
+      await api.delete(`/api/qa/${id}`, { silent: true });
+      ElMessage.success("会话已删除");
+      await fetchSessions();
 
-    if (isCurrentSession) {
-      // 删除的是当前会话 → 切到第一个剩余会话并加载真实消息
-      const remaining = sessionList.value.filter((s) => s.id !== id);
-      if (remaining.length > 0) {
-        await switchSession(remaining[0].id);
+      if (isCurrentSession) {
+        // 删除的是当前会话 → 切到第一个剩余会话并加载真实消息
+        const remaining = sessionList.value.filter((s) => s.id !== id);
+        if (remaining.length > 0) {
+          await switchSession(remaining[0].id);
+        }
       }
     }
   } catch {
