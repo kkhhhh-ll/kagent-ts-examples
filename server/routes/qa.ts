@@ -155,11 +155,13 @@ router.post<{}, any, { sessionId?: string; message: string }>(
         );
 
         if (toolCalls.length > 0) {
-          currentMessages.push({
+          const assistantToolMsg: MessageData = {
             role: Role.Assistant,
             content: contentBuffer || "",
             tool_calls: toolCalls as ToolCall[],
-          } as MessageData);
+          } as MessageData;
+          currentMessages.push(assistantToolMsg);
+          pushSessionMessage(session, sid, assistantToolMsg);
 
           for (const tc of toolCalls) {
             try {
@@ -180,23 +182,27 @@ router.post<{}, any, { sessionId?: string; message: string }>(
               if (resObj.message) {
                 sendSSE(res, { content: String(resObj.message) });
               }
-              currentMessages.push({
+              const toolResultMsg: MessageData = {
                 role: Role.Tool,
                 content: result,
                 tool_call_id: tc.id,
                 name: tc.function?.name,
-              } as MessageData);
+              } as MessageData;
+              currentMessages.push(toolResultMsg);
+              pushSessionMessage(session, sid, toolResultMsg);
             } catch (execErr: any) {
               traceLogger.onToolError(
                 tc.function?.name || "unknown",
                 execErr?.message || "未知错误",
               );
-              currentMessages.push({
+              const toolErrorMsg: MessageData = {
                 role: Role.Tool,
                 content: `工具执行失败: ${execErr?.message || "未知错误"}`,
                 tool_call_id: tc.id,
                 name: tc.function?.name,
-              } as MessageData);
+              } as MessageData;
+              currentMessages.push(toolErrorMsg);
+              pushSessionMessage(session, sid, toolErrorMsg);
             }
           }
 

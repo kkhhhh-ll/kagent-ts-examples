@@ -189,6 +189,21 @@ export function deleteAgent(sessionId: string) {
   sseSkillManagers.delete(sessionId);
 }
 
+/** 清除会话的 trace 事件（内存 + 磁盘 sidecar 文件） */
+export function clearTraceEvents(sessionId: string): void {
+  // 删除内存中的 TraceLogger（下次请求会重建）
+  traceLoggers.delete(sessionId);
+  // 删除磁盘上的 sidecar JSON 文件
+  try {
+    const filePath = traceEventsPath(sessionId);
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch {
+    // 删除失败不影响主流程
+  }
+}
+
 // ============ 应用层日志 → Trace ============
 
 export type TraceLogLevel = "info" | "warn" | "error";

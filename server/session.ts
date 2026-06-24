@@ -3,6 +3,7 @@ import { Role } from "kagent-ts";
 import { OpenAIProvider } from "kagent-ts";
 import { createLLM } from "./llm.js";
 import { queryAll, queryOne, insertAndGetId, executeWrite } from "./database.js";
+import { clearTraceEvents } from "./agent.js";
 
 // ============ Q&A 会话（内存缓存） ============
 
@@ -132,7 +133,7 @@ export function getAllSessions() {
   }));
 }
 
-/** 清空会话所有消息（保留会话本身），内存 + 数据库同步 */
+/** 清空会话所有消息（保留会话本身），内存 + 数据库同步，同时清除 trace 事件 */
 export function clearSessionMessages(sessionId: string): void {
   const session = qaSessions.get(sessionId);
   if (session) {
@@ -141,6 +142,7 @@ export function clearSessionMessages(sessionId: string): void {
   }
   executeWrite("DELETE FROM messages WHERE session_id = ?", [sessionId]);
   executeWrite("UPDATE sessions SET title = '新会话' WHERE id = ?", [sessionId]);
+  clearTraceEvents(sessionId);
 }
 
 export function deleteSession(sessionId: string): boolean {
@@ -221,9 +223,13 @@ export function buildLLMMessages(
 /** SSE 路线未激活技能时的默认系统提示词 */
 const AGENT_SYSTEM_PROMPT = `你是一个智能助手，可以回答用户的问题，也可以使用技能来帮助用户完成各种任务。遇到超出自己能力范围的问题时，要诚实告诉用户，并尽力提供有用的信息。`;
 
-/** 过滤出只供前端展示的消息（user + assistant） */
+/** 返回所有消息供前端展示（包括 tool 相关消息） */
 export function getDisplayMessages(session: QASession) {
-  return session.messages
-    .filter((m) => m.role === Role.User || m.role === Role.Assistant)
-    .map((m) => ({ role: m.role, content: m.content || "" }));
+  return session.messages.map((m) => ({
+    role: m.role,
+    content: m.content || "",
+    ...(m.tool_calls ? { tool_calls: m.tool_calls } : {}),
+    ...(m.tool_call_id ? { tool_call_id: m.tool_call_id } : {}),
+    ...(m.name ? { name: m.name } : {}),
+  }));
 }
