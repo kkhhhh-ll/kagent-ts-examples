@@ -25,18 +25,38 @@ export const createWorkOrderTool: Tool = {
     required: ["creator", "type", "duration", "cost"],
   },
   async execute(args) {
-    const { creator, type, duration, cost } = args as {
-      creator: string;
-      type: string;
-      duration: number;
-      cost: number;
-    };
-    const order = createOrder({ creator, type, duration, cost });
-    return JSON.stringify({
-      success: true,
-      id: order.id,
-      code: order.code,
-      message: `工单 ${order.code} 创建成功！`,
-    });
+    try {
+      const { creator, type, duration, cost } = args as {
+        creator: string;
+        type: string;
+        duration: number;
+        cost: number;
+      };
+
+      // 参数校验：返回结构化错误，让 LLM 能理解并引导用户修正
+      if (!creator || !creator.trim()) {
+        return JSON.stringify({ success: false, error: "创建人姓名不能为空" });
+      }
+      if (typeof duration !== "number" || duration <= 0) {
+        return JSON.stringify({ success: false, error: "工期必须是大于 0 的数字" });
+      }
+      if (typeof cost !== "number" || cost < 0) {
+        return JSON.stringify({ success: false, error: "费用必须是大于等于 0 的数字" });
+      }
+
+      const order = createOrder({ creator, type, duration, cost });
+      return JSON.stringify({
+        success: true,
+        id: order.id,
+        code: order.code,
+        message: `工单 ${order.code} 创建成功！`,
+      });
+    } catch (err: any) {
+      // 数据库写入等异常：不抛出，返回结构化失败结果，避免中断 Agent 循环
+      return JSON.stringify({
+        success: false,
+        error: `创建工单失败：${err?.message || "未知错误"}`,
+      });
+    }
   },
 };

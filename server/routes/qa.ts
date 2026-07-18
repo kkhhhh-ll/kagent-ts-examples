@@ -39,6 +39,25 @@ function extractAnswer(raw: string): string {
   return raw;
 }
 
+/** 将 LLM/网络层错误转为用户可读的中文提示 */
+function friendlyErrorMessage(err: any): string {
+  const msg = String(err?.message || err || "");
+  const status = err?.status ?? err?.response?.status;
+  if (status === 401 || /401|invalid.*api.?key|incorrect.*api.?key/i.test(msg)) {
+    return "LLM 接口认证失败，请检查 API Key 配置";
+  }
+  if (status === 429 || /429|rate.?limit|quota/i.test(msg)) {
+    return "LLM 请求过于频繁或额度不足，请稍后重试";
+  }
+  if (/timeout|timed?.?out|aborted/i.test(msg)) {
+    return "LLM 接口响应超时，请稍后重试";
+  }
+  if (/fetch failed|ECONNREFUSED|ENOTFOUND|ECONNRESET|network/i.test(msg)) {
+    return "无法连接 LLM 服务，请检查网络或 API 地址配置";
+  }
+  return msg || "服务器内部错误";
+}
+
 /**
  * 从累积缓冲区中增量提取 answer 内容。
  * 处理 "answer": "回答内容" 格式，兼容 key/value 之间的空格。
@@ -87,7 +106,7 @@ router.post<{}, any, { sessionId?: string; message: string }>(
         message: err?.message,
       });
       console.error("Agent error:", err?.message || err);
-      res.status(500).json({ error: err?.message || "处理出错" });
+      res.status(500).json({ error: friendlyErrorMessage(err) });
     }
   },
 );
@@ -134,19 +153,34 @@ router.post<{}, any, { sessionId?: string; message: string }>(
         let lastSentLen = 0;
         const toolCallsAcc = new Map<number, Partial<ToolCall>>();
 
-        traceLogger.onLLMStart(currentMessages, AGENT_TOOLS);
-        for await (const event of session.llm.chatStream(currentMessages, [
-          ...AGENT_TOOLS,
-        ])) {
-          if (event.type === "chunk") {
-            if (event.content) {
-              contentBuffer += event.content;
-              // 不做解析和过滤，直接推送原始内容，保证打字机效果和内容正常展示
-              sendSSE(res, { content: event.content });
+        // LLM 流式调用：尚未推送任何内容时失败则自动重试（网络抖动/限流）；
+        // 一旦已有内容推送到前端，重试会导致内容重复，只能抛给外层统一处理。
+        const MAX_LLM_RETRIES = 2;
+        for (let retry = 0; ; retry++) {
+          traceLogger.onLLMStart(currentMessages, AGENT_TOOLS);
+          try {
+            for await (const event of session.llm.chatStream(currentMessages, [
+              ...AGENT_TOOLS,
+            ])) {
+              if (event.type === "chunk") {
+                if (event.content) {
+                  contentBuffer += event.content;
+                  // 不做解析和过滤，直接推送原始内容，保证打字机效果和内容正常展示
+                  sendSSE(res, { content: event.content });
+                }
+                if (event.tool_calls && event.tool_calls.length > 0) {
+                  accumulateToolCalls(toolCallsAcc, event.tool_calls);
+                }
+              }
             }
-            if (event.tool_calls && event.tool_calls.length > 0) {
-              accumulateToolCalls(toolCallsAcc, event.tool_calls);
-            }
+            break;
+          } catch (llmErr: any) {
+            const hasOutput = contentBuffer.length > 0 || toolCallsAcc.size > 0;
+            if (hasOutput || retry >= MAX_LLM_RETRIES) throw llmErr;
+            traceLog(sid, "warn", `LLM 调用失败，第 ${retry + 1} 次重试`, {
+              message: llmErr?.message,
+            });
+            await new Promise((r) => setTimeout(r, 1000 * (retry + 1)));
           }
         }
 
@@ -195,6 +229,13 @@ router.post<{}, any, { sessionId?: string; message: string }>(
                 tc.function?.name || "unknown",
                 execErr?.message || "未知错误",
               );
+              // 通知前端工具执行失败，避免界面停留在"正在调用工具"状态
+              sendSSE(res, {
+                tool_result: {
+                  success: false,
+                  error: `工具执行失败: ${execErr?.message || "未知错误"}`,
+                },
+              });
               const toolErrorMsg: MessageData = {
                 role: Role.Tool,
                 content: `工具执行失败: ${execErr?.message || "未知错误"}`,
@@ -233,7 +274,7 @@ router.post<{}, any, { sessionId?: string; message: string }>(
         message: err?.message,
       });
       console.error("Stream error:", err?.message || err);
-      sendSSE(res, { error: `处理请求时出错: ${err?.message || "未知错误"}` });
+      sendSSE(res, { error: friendlyErrorMessage(err) });
       res.end();
     }
   },

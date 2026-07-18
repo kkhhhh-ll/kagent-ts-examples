@@ -93,9 +93,15 @@ export async function request<T = any>(
         const errorText = await res
           .text()
           .catch(() => `HTTP ${res.status}`);
-        throw new Error(
-          errorText.startsWith("{") ? `请求失败 (${res.status})` : errorText,
-        );
+        // 优先取后端 JSON 里的 error 字段（如 {"error":"工单不存在"}）
+        let message = errorText;
+        try {
+          const parsed = JSON.parse(errorText);
+          message = parsed?.error || parsed?.message || `请求失败 (${res.status})`;
+        } catch {
+          if (!message) message = `请求失败 (${res.status})`;
+        }
+        throw new Error(message);
       }
 
       // 204 No Content

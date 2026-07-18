@@ -622,7 +622,9 @@ async function handleSend() {
         });
         if (res.ok) break;
         if (res.status !== 502 || attempt >= 2) {
-          throw new Error(`请求失败 (${res.status})`);
+          // 优先取后端返回的 error 字段（如参数校验失败的提示）
+          const errBody = await res.json().catch(() => null);
+          throw new Error(errBody?.error || `请求失败 (${res.status})`);
         }
       } catch (err: any) {
         if (err.name === "AbortError") throw err;
@@ -657,6 +659,13 @@ async function handleSend() {
           if (data.content) {
             messages.value[msgIdx].content += data.content;
           }
+          if (data.error) {
+            // 后端处理出错（LLM 调用失败等），展示错误并终止本轮
+            messages.value[msgIdx].content +=
+              (messages.value[msgIdx].content ? "\n\n" : "") +
+              `⚠️ ${data.error}`;
+            ElMessage.error(data.error);
+          }
           if (data.tool_start) {
             const label =
               data.tool_start.name === "create_work_order"
@@ -668,6 +677,9 @@ async function handleSend() {
             const result = data.tool_result;
             if (result && result.message) {
               messages.value[msgIdx].content += `\n\n**${result.message}**`;
+            } else if (result && result.success === false && result.error) {
+              // 工具执行失败：展示失败原因
+              messages.value[msgIdx].content += `\n\n⚠️ ${result.error}`;
             }
           }
         } catch {
